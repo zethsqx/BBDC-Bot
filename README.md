@@ -39,4 +39,10 @@ BOOKING_PASSWORD=
 BOOKING_USER=
 ```
 
-3. Run and test
+3. Setup Cron and run script every 30min
+```
+dnf install cronie cronie-anacron -y 
+
+sudo crontab -e
+*/30 * * * * /usr/bin/python3 /root/BBDC-Bot/bbdc_bot.py >> ~/cron.log 2>&1
+```
