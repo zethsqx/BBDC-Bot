@@ -122,9 +122,10 @@ try:
   print(printList)
 
   # Craft message and send to telegram
-  mptdata = '\n'.join(printList)
-  mptdata = 'Run @ ' + str(start_date) + '\n\n' + mptdata
-  broadcastMessage(telelink, mptdata)
+  if len(printList) > 0:
+    mptdata = '\n'.join(printList)
+    mptdata = 'Run @ ' + str(start_date) + '\n\n' + mptdata
+    broadcastMessage(telelink, mptdata)
 
   subprocess.run(["podman", "restart", "chrome"]) 
   quit()
