@@ -43,14 +43,14 @@ try:
  # Accept Insecure and Choose default enrolled course
  proceedBtn = browser.find_element(By.ID, 'proceed-button')
  proceedBtn.click()
- submitBtn = browser.find_element_by_name('btnSubmit')
+ submitBtn = browser.find_element(By.NAME,'btnSubmit')
  submitBtn.click()
  print("Main Booking Page")
  
  
  # Switching to Left Frame and accessing element by text
  browser.switch_to.default_content()
- frame = browser.find_element_by_name('leftFrame')
+ frame = browser.find_element(By.NAME, 'leftFrame')
  browser.switch_to.frame(frame)
  bookingBtn = browser.find_element(By.CSS_SELECTOR, "a[href*='../b-2-pLessonBooking.asp?limit=pl']");
  bookingBtn.click()
@@ -65,23 +65,23 @@ try:
  # Selection menu
  browser.switch_to.default_content()
  wait = WebDriverWait(browser, 300)
- wait.until(EC.frame_to_be_available_and_switch_to_it(browser.find_element_by_name('mainFrame')))
+ wait.until(EC.frame_to_be_available_and_switch_to_it(browser.find_element(By.NAME, 'mainFrame')))
  wait.until(EC.visibility_of_element_located((By.ID, "checkMonth")))
  
  # 0 refers to first month, 1 refers to second month, and so on...
- months = browser.find_elements_by_id('checkMonth')
+ months = browser.find_element(By.ID, 'checkMonth')
  months[12].click() # all months
  
  # 0 refers to first session, 1 refers to second session, and so on...
- sessions = browser.find_elements_by_id('checkSes')
+ sessions = browser.find_element(By.ID, 'checkSes')
  sessions[8].click() # all sessions
  
  # 0 refers to first day, 1 refers to second day, and so on...
- days = browser.find_elements_by_id('checkDay')
+ days = browser.find_element(By.ID, 'checkDay')
  days[7].click() # all days
  
  # Selecting Search
- browser.find_element_by_name('btnSearch').click()
+ browser.find_element(By.NAME, 'btnSearch').click()
  
  # Dismissing Prompt
  wait = WebDriverWait(browser, 300)
@@ -91,7 +91,7 @@ try:
  wait.until(EC.visibility_of_element_located((By.NAME, "slot")))
  
  # 0 refers to first slot, 1 refers to second slot, and so on...
- slots = browser.find_elements_by_name('slot')
+ slots = browser.find_element(By.NAME, 'slot')
  for slot in slots:     # Selecting all checkboxes
      #slot.click()
      timeslot = slot.find_element(By.XPATH, './..').get_attribute('onmouseover')
