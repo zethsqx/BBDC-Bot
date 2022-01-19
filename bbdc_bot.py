@@ -110,19 +110,28 @@ try:
   #timeinfoList.append(['30/01/2022 (Wed)', '6', '17:10', '18:50'])
   #timeinfoList.append(['29/01/2022 (Wed)', '6', '17:10', '18:50'])  
   
+  # Date check and prepare message
   start_date = datetime.today()
   end_date = start_date + timedelta(6)
 
-  printList = []
+  resultList = []
   for t in timeinfoList: 
     dtobj = datetime.strptime(t[0][0:10], "%d/%m/%Y")
     if dtobj <= end_date:
-      printList.append(' '.join(t))
- 
-  print(printList)
+      resultList.append(' '.join(t))
+  print(resultList)
 
-  # Craft message and send to telegram
-  if len(printList) > 0:
+  # Condition Check, craft message and send to telegram
+  different = False
+  f = open("./cache", "r")
+  h1 = f.read()
+  h2 = hash(resultList)
+
+  if len(printList) > 0 and (h1 != h2):
+    f = open("./cache", "w")
+    f.write(h2)
+    f.close()
+
     mptdata = '\n'.join(printList)
     mptdata = 'Run @ ' + str(start_date) + '\n\n' + mptdata
     broadcastMessage(telelink, mptdata)
