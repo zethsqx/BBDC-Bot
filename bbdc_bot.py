@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import urllib.request
 import ssl
 import json
+import hashlib
 
 server ="http://127.0.0.1:4444/wd/hub"
 
@@ -122,21 +123,25 @@ try:
   print(resultList)
 
   # Condition Check, craft message and send to telegram
-  different = False
-  f = open("./cache", "r")
-  h1 = f.read()
-  h2 = hash(resultList)
+  try: 
+    f = open("cache", "r+")
+    h1 = f.read()
+  except:
+    h1 = ""
+  mptdata = '\n'.join(resultList)
+  h2 = hashlib.sha1(mptdata.encode("UTF-8")).hexdigest()
 
-  if len(printList) > 0 and (h1 != h2):
-    f = open("./cache", "w")
+  print("h1 is " + h1)
+  print("h2 is " + h2)
+  if len(resultList) > 0 and (h1 != h2):
+    f = open("cache", "w+")
     f.write(h2)
     f.close()
 
-    mptdata = '\n'.join(printList)
     mptdata = 'Run @ ' + str(start_date) + '\n\n' + mptdata
     broadcastMessage(telelink, mptdata)
 
-  subprocess.run(["podman", "restart", "chrome"]) 
+  subprocess.run(["systemctl", "restart", "container-chrome.service"]) 
   quit()
   
   #ids = browser.find_elements_by_xpath('//*[@id]')
@@ -145,6 +150,6 @@ try:
   #quit()
  
 except Exception as e:
-  print(e) 
-  subprocess.run(["podman", "restart", "chrome"])
+  print(e)
+  subprocess.run(["systemctl", "restart", "container-chrome.service"]) 
   quit()
