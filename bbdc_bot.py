@@ -100,29 +100,44 @@ try:
   slots = browser.find_elements(By.NAME, 'slot')
   timeinfoList = []
   for slot in slots:     # Selecting all checkboxes
-      #slot.click()
       timeslot = slot.find_element(By.XPATH, './..').get_attribute('onmouseover')
       timeinfo = timeslot[20:58].replace('"', '').split(",")
-      timeinfoList.append(timeinfo)
-  
+      timeinfoList.append(timeinfo)  
   #print(timeinfoList) 
-  #timeinfoList.append(['11/01/2022 (Wed)', '6', '17:10', '18:50'])
-  #timeinfoList.append(['12/01/2022 (Wed)', '6', '17:10', '18:50'])
-  #timeinfoList.append(['30/01/2022 (Wed)', '6', '17:10', '18:50'])
-  #timeinfoList.append(['29/01/2022 (Wed)', '6', '17:10', '18:50'])  
-  
-  # Date check and prepare message
-  start_date = datetime.today()
-  end_date = start_date + timedelta(6)
 
+  # Dummy data for troubleshooting
+  #timeinfoList.append(['23/01/2022 (Wed)', '6', '17:10', '18:50'])
+  #timeinfoList.append(['02/02/2022 (Wed)', '6', '17:10', '18:50'])
+  #timeinfoList.append(['29/01/2022 (Wed)', '6', '17:10', '18:50'])
+  #timeinfoList.append(['30/01/2022 (Wed)', '6', '17:10', '18:50'])
+  #timeinfoList.append(['31/01/2022 (Wed)', '6', '17:10', '18:50'])
+  #timeinfoList.append(['01/02/2022 (Wed)', '6', '17:10', '18:50'])  
+  #timeinfoList.append(['02/02/2022 (Wed)', '6', '17:10', '18:50'])  
+  #timeinfoList.append(['03/02/2022 (Wed)', '6', '17:10', '18:50'])  
+
+  # Set the number of days with slots to return based on day the script runs
+  now_date = datetime.today()
+  eta_date_wkday = now_date + timedelta(6) # Return 6day of available slots if script run during weekday
+  eta_date_wkend = now_date + timedelta(10) # Return 10day of available slots if script run during weekend
+  if now_date.weekday() >= 0 and now_date.weekday() <= 4:
+    eta_date = eta_date_wkday
+  else:
+    eta_date = eta_date_wkend
+  print("Looking for bookings before: " + str(eta_date))
+
+  # Loop through all bookings and to create list of results within number of days
   resultList = []
   for t in timeinfoList: 
     dtobj = datetime.strptime(t[0][0:10], "%d/%m/%Y")
-    if dtobj <= end_date:
-      resultList.append(' '.join(t))
-  print(resultList)
+    if dtobj <= eta_date:
+        resultList.append(' '.join(t))
+    else:
+        break
+  print("Results to send to notification: " + str(resultList))
 
-  # Condition Check, craft message and send to telegram
+  # Read file for hash from previous run
+  # Hash the current returned data results
+  # Comparing previous and current run hash to prevent spaming notification if no new slot available
   try: 
     f = open("cache", "r+")
     h1 = f.read()
@@ -131,25 +146,30 @@ try:
   mptdata = '\n'.join(resultList)
   h2 = hashlib.sha1(mptdata.encode("UTF-8")).hexdigest()
 
-  print("h1 is " + h1)
-  print("h2 is " + h2)
+  print("Hash, h1 is " + h1)
+  print("Hash, h2 is " + h2)
   if len(resultList) > 0 and (h1 != h2):
     f = open("cache", "w+")
     f.write(h2)
     f.close()
 
-    mptdata = 'Run @ ' + str(start_date) + '\n\n' + mptdata
+    # Concate and send message to telegram
+    mptdata = 'Run @ ' + str(datetime.today()) + '\n\n' + mptdata
     broadcastMessage(telelink, mptdata)
 
-  subprocess.run(["systemctl", "restart", "container-chrome.service"]) 
+  # Restart container 
+  print("...Restarting Container...")
+  subprocess.run(["systemctl", "restart", "container-chrome.service"])
   quit()
   
-  #ids = browser.find_elements_by_xpath('//*[@id]')
-  #for ii in ids:
-      #print(ii.get_attribute('id'))
-  #quit()
+#  # Use the following code block for troubleshooting and debugging
+#  #ids = browser.find_elements_by_xpath('//*[@id]')
+#  #for ii in ids:
+#      #print(ii.get_attribute('id'))
+#  #quit()
  
 except Exception as e:
   print(e)
+  print("...Restarting Container...")
   subprocess.run(["systemctl", "restart", "container-chrome.service"]) 
   quit()
