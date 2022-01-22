@@ -1,6 +1,6 @@
 # Overview
 
-Fork from https://github.com/rohit0718/BBDC-Bot. Refer to upstream. 
+Detached fork from https://github.com/rohit0718/BBDC-Bot. Refer to previous upstream. 
 
 ## Background
 The upstream code does not work for class 2b (bike) and had logic built to mass book for class 3 (car). Revisited the logic flow and did not integrate auto booking as it requires cancellation step. Moved from hassle of installing selenium to using selenium-chrome docker image. Using podman as I prefer it over docker :)  
