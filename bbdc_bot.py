@@ -35,11 +35,8 @@ def broadcastMessage(elink,einfo):
    with urllib.request.urlopen(request, context=myssl) as r:
      r.read()
 
-try: 
-  browser_options = webdriver.ChromeOptions()
-  browser_options.accept_untrusted_certs = True
-  browser = webdriver.Remote(command_executor=server,options=browser_options)
 
+def loginMainPage(browser):
   # Load Main Login Page
   browser.get('https://info.bbdc.sg/members-login/')
   print("Main Login Page Loaded...")
@@ -59,7 +56,8 @@ try:
   submitBtn = browser.find_element(By.NAME,'btnSubmit')
   submitBtn.click()
   print("Main Booking Page Loaded...")
-    
+
+def getAvailableBooking(browser):
   # Switching to Left Frame and accessing element by text
   browser.switch_to.default_content()
   frame = browser.find_element(By.NAME, 'leftFrame')
@@ -73,7 +71,7 @@ try:
   wait = WebDriverWait(browser, 300)
   wait.until(EC.frame_to_be_available_and_switch_to_it(browser.find_element(By.NAME, 'mainFrame')))
   wait.until(EC.visibility_of_element_located((By.ID, "checkMonth")))
-  print("Main Frame Page Loaded...")
+  print("Main Frame Practical Booking Page Loaded...")
  
   # 0 refers to first month, 1 refers to second month, and so on...
   months = browser.find_elements(By.ID, 'checkMonth')
@@ -103,9 +101,50 @@ try:
       timeslot = slot.find_element(By.XPATH, './..').get_attribute('onmouseover')
       timeinfo = timeslot[20:58].replace('"', '').split(",")
       timeinfoList.append(timeinfo)  
+  return timeinfoList
   #print(timeinfoList) 
 
+def getExistingBooking(browser):
+  # Switching to Left Frame and accessing element by text
+  browser.switch_to.default_content()
+  frame = browser.find_element(By.NAME, 'leftFrame')
+  browser.switch_to.frame(frame)
+  bookingBtn = browser.find_element(By.CSS_SELECTOR, "a[href*='../b-bookTestStatement.asp']");
+  bookingBtn.click()
+  print("...Clicking Booking Statement")
+
+  # Booking Statement Page
+  browser.switch_to.default_content()
+  wait = WebDriverWait(browser, 300)
+  wait.until(EC.frame_to_be_available_and_switch_to_it(browser.find_element(By.NAME, 'mainFrame')))
+  wait.until(EC.visibility_of_element_located((By.NAME, "btnHome")))
+  print("Main Frame for Booking Statement Page Loaded...")
+
+  try:
+    bookedDate = browser.find_element(By.XPATH, '/html/body/table/tbody/tr/td[2]/form/table/tbody/tr[5]/td/table/tbody/tr[2]/td[1]').text
+    bookedSession = browser.find_element(By.XPATH, '/html/body/table/tbody/tr/td[2]/form/table/tbody/tr[5]/td/table/tbody/tr[2]/td[2]').text
+    bookedTime = browser.find_element(By.XPATH, '/html/body/table/tbody/tr/td[2]/form/table/tbody/tr[5]/td/table/tbody/tr[2]/td[3]').text 
+    return bookedDate + "," + bookedSession + "," + bookedTime
+  except:
+    return "None"
+
+def end():
+  # Restart container 
+  print("...Restarting Container...")
+  subprocess.run(["systemctl", "restart", "container-chrome.service"])
+  quit()
+
+try: 
+  browser_options = webdriver.ChromeOptions()
+  browser_options.accept_untrusted_certs = True
+  browser = webdriver.Remote(command_executor=server,options=browser_options)
+
+  loginMainPage(browser)
+  existingBooking = getExistingBooking(browser)
+  timeinfoList = getAvailableBooking(browser)
+
   # Dummy data for troubleshooting
+  #timeinfoList = []
   #timeinfoList.append(['23/01/2022 (Wed)', '6', '17:10', '18:50'])
   #timeinfoList.append(['02/02/2022 (Wed)', '6', '17:10', '18:50'])
   #timeinfoList.append(['29/01/2022 (Wed)', '6', '17:10', '18:50'])
@@ -154,13 +193,8 @@ try:
     f.close()
 
     # Concate and send message to telegram
-    mptdata = 'Run @ ' + str(datetime.today()) + '\n\n' + mptdata
+    mptdata = 'Script Run @ ' + str(datetime.today()) + '\nMy Booking @ ' + existingBooking + '\n\n' + mptdata
     broadcastMessage(telelink, mptdata)
-
-  # Restart container 
-  print("...Restarting Container...")
-  subprocess.run(["systemctl", "restart", "container-chrome.service"])
-  quit()
   
 #  # Use the following code block for troubleshooting and debugging
 #  #ids = browser.find_elements_by_xpath('//*[@id]')
@@ -170,6 +204,7 @@ try:
  
 except Exception as e:
   print(e)
-  print("...Restarting Container...")
-  subprocess.run(["systemctl", "restart", "container-chrome.service"]) 
-  quit()
+
+print("...Restarting Container...")
+subprocess.run(["systemctl", "restart", "container-chrome.service"]) 
+quit()
