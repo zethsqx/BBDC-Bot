@@ -123,8 +123,10 @@ def getExistingBooking(browser):
   try:
     bookedDate = browser.find_element(By.XPATH, '/html/body/table/tbody/tr/td[2]/form/table/tbody/tr[5]/td/table/tbody/tr[2]/td[1]').text
     bookedSession = browser.find_element(By.XPATH, '/html/body/table/tbody/tr/td[2]/form/table/tbody/tr[5]/td/table/tbody/tr[2]/td[2]').text
-    bookedTime = browser.find_element(By.XPATH, '/html/body/table/tbody/tr/td[2]/form/table/tbody/tr[5]/td/table/tbody/tr[2]/td[3]').text 
-    return bookedDate + "," + bookedSession + "," + bookedTime
+    bookedTime = browser.find_element(By.XPATH, '/html/body/table/tbody/tr/td[2]/form/table/tbody/tr[5]/td/table/tbody/tr[2]/td[3]').text
+    existingBooking = bookedDate + "," + bookedSession + "," + bookedTime
+    print("My Existing Booking: " + existingBooking) 
+    return existingBooking
   except:
     return "None"
 
