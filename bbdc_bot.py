@@ -14,6 +14,7 @@ import ssl
 import json
 import hashlib
 
+# Server url
 server ="http://127.0.0.1:4444/wd/hub"
 
 # Import env values for telegram
